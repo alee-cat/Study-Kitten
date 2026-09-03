@@ -36,6 +36,12 @@ College students who want a simple way to organize their coursework.
 
 ## Technology Stack
 
+- Frontend: React Native, TanStack Query
+- Backend: Node.js, Express.js
+- Databases: MondoDB
+- Authentication: JWT, Refresh Tokens
+- DevOps: Docker
+- Testing: Appium
 
 
 ## Team Members
