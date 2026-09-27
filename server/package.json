@@ -1,0 +1,16 @@
+{
+  "name": "studykitten-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "StudyKitten API server",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
