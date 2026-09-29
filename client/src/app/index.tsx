@@ -25,6 +25,7 @@ export default function HomeScreen() {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskCourse, setNewTaskCourse] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -74,15 +75,32 @@ export default function HomeScreen() {
                     return;
                   }
 
-                  const newTask = {
-                    id: Date.now(),
-                    title: newTaskTitle,
-                    course: newTaskCourse,
-                    dueDate: newTaskDueDate,
-                    completed: false,
-                  };
-
-                  setTasks([...tasks, newTask]);
+                  if (editingTaskId !== null) {
+                    setTasks(
+                      tasks.map((task) =>
+                        task.id === editingTaskId
+                          ? {
+                              ...task,
+                              title: newTaskTitle,
+                              course: newTaskCourse,
+                              dueDate: newTaskDueDate,
+                            }
+                          : task
+                      )
+                    );
+                  
+                    setEditingTaskId(null);
+                  } else {
+                    const newTask = {
+                      id: Date.now(),
+                      title: newTaskTitle,
+                      course: newTaskCourse,
+                      dueDate: newTaskDueDate,
+                      completed: false,
+                    };
+                  
+                    setTasks([...tasks, newTask]);
+                  }
 
                   setNewTaskTitle('');
                   setNewTaskCourse('');
@@ -124,6 +142,28 @@ export default function HomeScreen() {
               <Text>
                 {task.completed ? '✓ Completed' : 'Mark Complete'}
               </Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.editButton}
+              onPress={() => {
+                setEditingTaskId(task.id);
+                setNewTaskTitle(task.title);
+                setNewTaskCourse(task.course);
+                setNewTaskDueDate(task.dueDate);
+                setShowAddTask(true);
+              }}
+            >
+              <Text style={styles.editButtonText}>Edit</Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.deleteButton}
+              onPress={() => {
+                setTasks(tasks.filter((item) => item.id !== task.id));
+              }}
+            >
+              <Text style={styles.deleteButtonText}>Delete</Text>
             </Pressable>
           </View>
         ))}
@@ -244,6 +284,30 @@ const styles = StyleSheet.create({
   
   saveButtonText: {
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  deleteButton: {
+    marginTop: 10,
+    padding: 8,
+    backgroundColor: '#FADADD',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  
+  deleteButtonText: {
+    fontWeight: 'bold',
+  },
+
+  editButton: {
+    marginTop: 10,
+    padding: 8,
+    backgroundColor: '#E8DDF8',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  
+  editButtonText: {
     fontWeight: 'bold',
   },
 });
