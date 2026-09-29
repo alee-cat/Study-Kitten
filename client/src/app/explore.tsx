@@ -18,6 +18,7 @@ export default function CoursesScreen() {
   const [showAddCourse, setShowAddCourse] = useState(false);
   const [newCourseCode, setNewCourseCode] = useState('');
   const [newCourseName, setNewCourseName] = useState('');
+  const [editingCourseId, setEditingCourseId] = useState<number | null>(null);
   
   return (
     <SafeAreaView style={styles.container}>
@@ -60,13 +61,29 @@ export default function CoursesScreen() {
                 return;
               }
 
-              const newCourse = {
-                id: Date.now(),
-                code: newCourseCode,
-                name: newCourseName,
-              };
-
-              setCourses([...courses, newCourse]);
+              if (editingCourseId !== null) {
+                setCourses(
+                  courses.map((course) =>
+                    course.id === editingCourseId
+                      ? {
+                          ...course,
+                          code: newCourseCode,
+                          name: newCourseName,
+                        }
+                      : course
+                  )
+                );
+              
+                setEditingCourseId(null);
+              } else {
+                const newCourse = {
+                  id: Date.now(),
+                  code: newCourseCode,
+                  name: newCourseName,
+                };
+              
+                setCourses([...courses, newCourse]);
+              }
 
               setNewCourseCode('');
               setNewCourseName('');
@@ -82,6 +99,27 @@ export default function CoursesScreen() {
         <View style={styles.courseCard} key={course.id}>
           <Text style={styles.courseName}>{course.code}</Text>
           <Text>{course.name}</Text>
+
+          <Pressable
+            style={styles.editButton}
+            onPress={() => {
+              setEditingCourseId(course.id);
+              setNewCourseCode(course.code);
+              setNewCourseName(course.name);
+              setShowAddCourse(true);
+            }}
+          >
+            <Text style={styles.editButtonText}>Edit</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.deleteButton}
+            onPress={() => {
+              setCourses(courses.filter((item) => item.id !== course.id));
+            }}
+          >
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </Pressable>
         </View>
       ))}
       </SafeAreaView>
@@ -163,6 +201,30 @@ const styles = StyleSheet.create({
 
   saveButtonText: {
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  deleteButton: {
+    marginTop: 10,
+    padding: 8,
+    backgroundColor: '#FADADD',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  
+  deleteButtonText: {
+    fontWeight: 'bold',
+  },
+
+  editButton: {
+    marginTop: 10,
+    padding: 8,
+    backgroundColor: '#E8DDF8',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  
+  editButtonText: {
     fontWeight: 'bold',
   },
 });
