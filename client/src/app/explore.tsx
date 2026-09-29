@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -22,6 +22,10 @@ export default function CoursesScreen() {
   
   return (
     <SafeAreaView style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
       <View>
         <Text style={styles.title}>My Courses 📚</Text>
         <Text style={styles.subtitle}>
@@ -122,7 +126,8 @@ export default function CoursesScreen() {
           </Pressable>
         </View>
       ))}
-      </SafeAreaView>
+      </ScrollView>
+    </SafeAreaView>
     );
   }
 
@@ -226,5 +231,9 @@ const styles = StyleSheet.create({
   
   editButtonText: {
     fontWeight: 'bold',
+  },
+
+  scrollContent: {
+    paddingBottom: 40,
   },
 });

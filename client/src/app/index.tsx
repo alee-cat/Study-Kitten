@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -29,6 +29,10 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
       <View>
         <Text style={styles.title}>Study Kitten 🐱</Text>
         <Text style={styles.subtitle}>Let&apos;s get some work done!</Text>
@@ -171,8 +175,13 @@ export default function HomeScreen() {
 
       <View style={styles.kittenSection}>
         <Text style={styles.kitten}>🐱</Text>
-        <Text>Your study kitten is ready to study!</Text>
+        <Text>
+          {tasks.some((task) => task.completed)
+            ? 'Your study kitten is proud of you! 💕'
+            : 'Your study kitten is ready to study!'}
+        </Text>
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -309,5 +318,9 @@ const styles = StyleSheet.create({
   
   editButtonText: {
     fontWeight: 'bold',
+  },
+
+  scrollContent: {
+    paddingBottom: 40,
   },
 });
