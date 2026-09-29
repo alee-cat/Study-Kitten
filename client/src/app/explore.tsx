@@ -1,180 +1,168 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ExternalLink } from '@/components/external-link';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
-  const theme = useTheme();
-
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
+export default function CoursesScreen() {
+  const [courses, setCourses] = useState([
+    {
+      id: 1,
+      code: 'CS 415',
+      name: 'Software Engineering',
     },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
+    {
+      id: 2,
+      code: 'SOC 101',
+      name: 'Sociology',
     },
-  });
-
+  ]);
+  const [showAddCourse, setShowAddCourse] = useState(false);
+  const [newCourseCode, setNewCourseCode] = useState('');
+  const [newCourseName, setNewCourseName] = useState('');
+  
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
+    <SafeAreaView style={styles.container}>
+      <View>
+        <Text style={styles.title}>My Courses 📚</Text>
+        <Text style={styles.subtitle}>
+          Keep all your classes in one place.
+        </Text>
+      </View>
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
-            </Pressable>
-          </ExternalLink>
-        </ThemedView>
+      <Pressable
+        style={styles.addButton}
+        onPress={() => setShowAddCourse(true)}
+      >
+        <Text style={styles.addButtonText}>+ Add Course</Text>
+      </Pressable>
 
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+      {showAddCourse && (
+        <View style={styles.form}>
+          <Text style={styles.formTitle}>New Course</Text>
 
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
+          <TextInput
+            style={styles.input}
+            placeholder="Course code"
+            value={newCourseCode}
+            onChangeText={setNewCourseCode}
+          />
 
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+          <TextInput
+            style={styles.input}
+            placeholder="Course name"
+            value={newCourseName}
+            onChangeText={setNewCourseName}
+          />
 
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+          <Pressable
+            style={styles.saveButton}
+            onPress={() => {
+              if (!newCourseCode || !newCourseName) {
+                return;
+              }
 
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
-  );
-}
+              const newCourse = {
+                id: Date.now(),
+                code: newCourseCode,
+                name: newCourseName,
+              };
+
+              setCourses([...courses, newCourse]);
+
+              setNewCourseCode('');
+              setNewCourseName('');
+              setShowAddCourse(false);
+            }}
+          >
+            <Text style={styles.saveButtonText}>Save Course</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {courses.map((course) => (
+        <View style={styles.courseCard} key={course.id}>
+          <Text style={styles.courseName}>{course.code}</Text>
+          <Text>{course.name}</Text>
+        </View>
+      ))}
+      </SafeAreaView>
+    );
+  }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
   container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
+    flex: 1,
+    padding: 24,
+    backgroundColor: '#FFF7FC',
   },
-  titleContainer: {
-    gap: Spacing.three,
+
+  title: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    marginTop: 10,
+  },
+
+  subtitle: {
+    fontSize: 16,
+    marginTop: 5,
+    marginBottom: 25,
+  },
+
+  addButton: {
+    backgroundColor: '#F2D7E9',
+    padding: 12,
+    borderRadius: 12,
     alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
+    marginBottom: 20,
   },
-  centerText: {
-    textAlign: 'center',
+
+  addButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
-  pressed: {
-    opacity: 0.7,
+
+  courseCard: {
+    backgroundColor: 'white',
+    padding: 18,
+    borderRadius: 16,
+    marginBottom: 12,
   },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: 'center',
-    gap: Spacing.one,
+
+  courseName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+
+  form: {
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 15,
+  },
+
+  formTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+  },
+
+  saveButton: {
+    backgroundColor: '#F2D7E9',
+    padding: 12,
+    borderRadius: 10,
     alignItems: 'center',
   },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  collapsibleContent: {
-    alignItems: 'center',
-  },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
+
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
