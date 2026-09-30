@@ -5,6 +5,7 @@ import express from 'express';
 import healthRoutes from "./routes/health.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import assignmentRoutes from "./routes/assignment.routes.js";
+import courseRoutes from "./routes/course.routes.js";
 import { connectDB } from "./db/client.js";
 import { createIndexes } from "../mongodb/collection.js";
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api", healthRoutes);
 app.use("/api", authRoutes);
 app.use("/api", assignmentRoutes);
+app.use("/api", courseRoutes);
 
 app.use((err, req, res, next) => {
     console.error(err);

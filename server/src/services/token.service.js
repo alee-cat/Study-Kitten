@@ -10,12 +10,15 @@ const REFRESH_TOKEN_TTL = "7d";
 
 export const TokenService = {
     issueTokens(user) {
-        const payload = {sub: user.id, email: user.email};
+        const id = (user.id ?? user._id)?.toString();
+        if (!id) throw new Error("issueTokens: user has no id");
+
+        const payload = { sub: id, email: user.email };
         const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
             expiresIn: ACCESS_TOKEN_TTL,
         });
 
-        const refreshToken = jwt.sign(payload, ACCESS_TOKEN_TTL, {
+        const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
             expiresIn: REFRESH_TOKEN_TTL,
         });
         return {accessToken, refreshToken};
