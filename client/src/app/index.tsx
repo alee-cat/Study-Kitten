@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -26,6 +26,12 @@ export default function HomeScreen() {
   const [newTaskCourse, setNewTaskCourse] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+  const [showTaskSettings, setShowTaskSettings] = useState(false);
+  const [showEditTasks, setShowEditTasks] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [showDeleteTasks, setShowDeleteTasks] = useState(false);
+  const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>([]);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -39,7 +45,39 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Upcoming Tasks</Text>
+      <View style={styles.taskHeader}>
+        <Text style={styles.sectionTitle}>Tasks</Text>
+
+        <Pressable
+          style={styles.settingsButton}
+          onPress={() => setShowTaskSettings(!showTaskSettings)}>
+          <Text style={styles.settingsIcon}>⚙️</Text>
+        </Pressable>
+      </View>
+
+      {showTaskSettings && (
+        <View style={styles.settingsMenu}>
+          <Pressable
+            style={styles.settingsMenuItem}
+            onPress={() => {
+              setShowTaskSettings(false);
+              setShowEditTasks(true);
+            }}>
+            <Text style={styles.settingsMenuText}>Edit</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.settingsMenuItem}
+            onPress={() => {
+              setShowTaskSettings(false);
+              setSelectedTaskIds([]);
+              setShowDeleteTasks(true);
+            }}>
+            <Text style={styles.settingsMenuText}>Delete</Text>
+          </Pressable>
+        </View>
+      )}
+
           <Pressable 
             style={styles.addButton}
             onPress={() => setShowAddTask(true)}
@@ -147,28 +185,6 @@ export default function HomeScreen() {
                 {task.completed ? '✓ Completed' : 'Mark Complete'}
               </Text>
             </Pressable>
-
-            <Pressable
-              style={styles.editButton}
-              onPress={() => {
-                setEditingTaskId(task.id);
-                setNewTaskTitle(task.title);
-                setNewTaskCourse(task.course);
-                setNewTaskDueDate(task.dueDate);
-                setShowAddTask(true);
-              }}
-            >
-              <Text style={styles.editButtonText}>Edit</Text>
-            </Pressable>
-
-            <Pressable
-              style={styles.deleteButton}
-              onPress={() => {
-                setTasks(tasks.filter((item) => item.id !== task.id));
-              }}
-            >
-              <Text style={styles.deleteButtonText}>Delete</Text>
-            </Pressable>
           </View>
         ))}
       </View>
@@ -182,6 +198,209 @@ export default function HomeScreen() {
         </Text>
       </View>
       </ScrollView>
+      <Modal
+        visible={showEditTasks}
+        transparent
+        animationType="none"
+        onRequestClose={() => setShowEditTasks(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setShowEditTasks(false)}>
+              <Text style={styles.modalCloseText}>✕</Text>
+            </Pressable>
+
+            <Text style={styles.modalTitle}>Edit Task</Text>
+            <Text style={styles.modalSubtitle}>
+              Choose a task to edit
+            </Text>
+
+            {tasks.map((task) => (
+              <Pressable
+                key={task.id}
+                style={styles.modalTask}
+                onPress={() => {
+                  setEditingTaskId(task.id);
+                  setNewTaskTitle(task.title);
+                  setNewTaskCourse(task.course);
+                  setNewTaskDueDate(task.dueDate);
+                  setShowEditTasks(false);
+                  setShowEditForm(true);
+                }}>
+                <Text style={styles.modalTaskTitle}>{task.title}</Text>
+                <Text>{task.course}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showEditForm}
+        transparent
+        animationType="none"
+        onRequestClose={() => setShowEditForm(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setShowEditForm(false)}>
+              <Text style={styles.modalCloseText}>✕</Text>
+            </Pressable>
+
+            <Text style={styles.modalTitle}>Edit Task</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Task name"
+              value={newTaskTitle}
+              onChangeText={setNewTaskTitle}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Course"
+              value={newTaskCourse}
+              onChangeText={setNewTaskCourse}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Due date"
+              value={newTaskDueDate}
+              onChangeText={setNewTaskDueDate}
+            />
+
+            <Pressable
+              style={styles.saveButton}
+              onPress={() => {
+                if (editingTaskId === null) return;
+
+                setTasks(
+                  tasks.map((task) =>
+                    task.id === editingTaskId
+                      ? {
+                          ...task,
+                          title: newTaskTitle,
+                          course: newTaskCourse,
+                          dueDate: newTaskDueDate,
+                        }
+                      : task
+                  )
+                );
+
+                setEditingTaskId(null);
+                setShowEditForm(false);
+                setNewTaskTitle('');
+                setNewTaskCourse('');
+                setNewTaskDueDate('');
+              }}>
+              <Text style={styles.saveButtonText}>Save Changes</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showDeleteTasks}
+        transparent
+        animationType="none"
+        onRequestClose={() => setShowDeleteTasks(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setShowDeleteTasks(false)}>
+              <Text style={styles.modalCloseText}>✕</Text>
+            </Pressable>
+
+            <Text style={styles.modalTitle}>Delete Tasks</Text>
+            <Text style={styles.modalSubtitle}>
+              Choose the tasks you want to delete
+            </Text>
+
+            {tasks.map((task) => (
+              <Pressable
+                key={task.id}
+                style={styles.modalTask}
+                onPress={() => {
+                  setSelectedTaskIds((current) =>
+                    current.includes(task.id)
+                      ? current.filter((id) => id !== task.id)
+                      : [...current, task.id]
+                  );
+                }}>
+                <Text style={styles.modalTaskTitle}>{task.title}</Text>
+
+                <View
+                  style={[
+                    styles.deleteBubble,
+                    selectedTaskIds.includes(task.id) && styles.deleteBubbleSelected,
+                  ]}
+                />
+              </Pressable>
+            ))}
+
+            <Pressable
+              style={styles.deleteSelectedButton}
+              disabled={selectedTaskIds.length === 0}
+              onPress={() => {
+                setShowDeleteTasks(false);
+                setShowDeleteConfirmation(true);
+              }}>
+              <Text style={styles.deleteSelectedButtonText}>
+                Delete
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showDeleteConfirmation}
+        transparent
+        animationType="none"
+        onRequestClose={() => setShowDeleteConfirmation(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setShowDeleteConfirmation(false)}>
+              <Text style={styles.modalCloseText}>✕</Text>
+            </Pressable>
+
+            <Text style={styles.modalTitle}>Are you sure?</Text>
+
+            <Text style={styles.modalSubtitle}>
+              You are about to delete:
+            </Text>
+
+            {tasks
+              .filter((task) => selectedTaskIds.includes(task.id))
+              .map((task) => (
+                <Text key={task.id} style={styles.confirmTaskName}>
+                  • {task.title}
+                </Text>
+              ))}
+
+            <Pressable
+              style={styles.confirmDeleteButton}
+              onPress={() => {
+                setTasks(
+                  tasks.filter((task) => !selectedTaskIds.includes(task.id))
+                );
+
+                setSelectedTaskIds([]);
+                setShowDeleteConfirmation(false);
+              }}>
+              <Text style={styles.deleteSelectedButtonText}>
+                Yes, Delete
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -322,5 +541,142 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     paddingBottom: 40,
+  },
+
+  taskHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  
+  settingsButton: {
+    padding: 6,
+  },
+  
+  settingsIcon: {
+    fontSize: 22,
+  },
+
+  settingsMenu: {
+    position: 'absolute',
+    top: 45,
+    right: 10,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    paddingVertical: 5,
+    width: 100,
+    zIndex: 10,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+  },
+  
+  settingsMenuItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  
+  settingsMenuText: {
+    fontSize: 16,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 25,
+  },
+  
+  modalContent: {
+    backgroundColor: 'white',
+    width: '100%',
+    borderRadius: 20,
+    padding: 20,
+    position: 'relative',
+  },
+  
+  modalCloseButton: {
+    position: 'absolute',
+    top: 12,
+    right: 15,
+    zIndex: 1,
+    padding: 5,
+  },
+  
+  modalCloseText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  
+  modalSubtitle: {
+    marginBottom: 15,
+  },
+  
+  modalTask: {
+    padding: 15,
+    borderRadius: 12,
+    backgroundColor: '#f5f5f5',
+    marginBottom: 10,
+  },
+  
+  modalTaskTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  deleteBubble: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: '#999',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    right: 15,
+    top: 15,
+  },
+
+  deleteBubbleSelected: {
+    backgroundColor: '#999',
+  },
+
+  deleteSelectedButton: {
+    marginTop: 10,
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: '#ff6b6b',
+    alignItems: 'center',
+  },
+  
+  deleteSelectedButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+
+  confirmTaskName: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  
+  confirmDeleteButton: {
+    marginTop: 15,
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: '#ff6b6b',
+    alignItems: 'center',
   },
 });
