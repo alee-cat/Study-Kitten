@@ -4,25 +4,12 @@
 import { Router } from "express";
 import { CourseService } from "../services/course.service.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
+import { sendError, notFound } from "../utils/http.js";
 
 const router = Router();
-const statusByCode = {
-    MISSING_NAME: 400,
-    INVALID_ID: 400,
-};
+
 
 router.use(requireAuth);
-
-function sendError(res, err) {
-    const status = statusByCode[err.code] ?? 500;
-    if (status === 500) console.error(err);
-    res.status(status).json({
-        error: {
-            code: err.code || "SERVER_ERROR",
-            message: status === 500 ? "Something went wrong" : err.message,
-        },
-    });
-}
 
 router.get("/courses", async (req, res) => {
     try {
@@ -48,7 +35,7 @@ router.post("/courses", async (req, res) => {
 router.patch("/courses/:id", async (req, res) => {
     try {
         const updated = await CourseService.update(req.params.id, req.user.id, req.body);
-        if (!updated) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Not found" } });
+        if (!updated) return notFound(res);
         res.json(updated);
     } catch (err) {
         sendError(res, err);
@@ -58,7 +45,7 @@ router.patch("/courses/:id", async (req, res) => {
 router.delete("/courses/:id", async (req, res) => {
     try {
         const ok = await CourseService.delete(req.params.id, req.user.id);
-        if (!ok) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Not found" } });
+        if (!ok) return notFound(res);
         res.status(204).end();
     } catch (err) {
         sendError(res, err);

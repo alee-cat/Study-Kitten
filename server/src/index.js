@@ -6,6 +6,7 @@ import healthRoutes from "./routes/health.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import assignmentRoutes from "./routes/assignment.routes.js";
 import courseRoutes from "./routes/course.routes.js";
+import taskRoutes from "./routes/task.routes.js";
 import { connectDB } from "./db/client.js";
 import { createIndexes } from "../mongodb/collection.js";
 
@@ -17,6 +18,7 @@ app.use("/api", healthRoutes);
 app.use("/api", authRoutes);
 app.use("/api", assignmentRoutes);
 app.use("/api", courseRoutes);
+app.use("/api", taskRoutes);
 
 app.use((err, req, res, next) => {
     console.error(err);
