@@ -5,7 +5,8 @@
   "description": "StudyKitten API server",
   "type": "module",
   "scripts": {
-    "dev": "node --watch --env-file=.env src/index.js"
+    "dev": "node --watch --env-file=.env src/index.js",
+    "test": "node --test --env-file=.env.test \"__tests__/**/*.test.js\""
   },
   "keywords": [],
   "author": "",
@@ -16,5 +17,9 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.7.0"
+  },
+  "main": "index.js",
+  "devDependencies": {
+    "supertest": "^7.3.1"
   }
 }
