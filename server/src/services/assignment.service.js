@@ -4,6 +4,7 @@ import { AssignmentRepository } from "../repositories/assignment.repository.js";
 import { CourseRepository } from "../repositories/course.repository.js";
 import { assertNonEmpty } from "../utils/validation.js";
 import { ObjectId } from "mongodb";
+import { parseDueDate } from "../utils/dates.js";
 
 async function assertCourseOwned(courseId, userId) {
     if (!ObjectId.isValid(courseId) || !(await CourseRepository.findOwned(courseId, userId))) {
@@ -11,16 +12,6 @@ async function assertCourseOwned(courseId, userId) {
         err.code = "INVALID_COURSE";
         throw err;
     }
-}
-
-function parseDueDate(value) {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-        const err = new Error("Invalid dueDate");
-        err.code = "INVALID_DUE_DATE";
-        throw err;
-    }
-    return date;
 }
 
 export const AssignmentService = {
