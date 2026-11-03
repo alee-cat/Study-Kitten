@@ -14,6 +14,7 @@ const statusByCode = {
 
     //courses and assignments and study tasks
     INVALID_COURSE: 400,
+    INVALID_SORT: 400,
 };
 
 export function sendError(res, err) {

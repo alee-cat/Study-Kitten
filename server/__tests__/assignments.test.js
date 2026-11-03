@@ -99,6 +99,19 @@ describe("assignments read", () => {
         assert.ok(byStatus.body.every((a) => a.completionStatus === "done"));
     });
 
+    test("sorts by priority, high first", async () => {
+        await create(validBody(course._id, { title: "L", priority: "low" }));
+        await create(validBody(course._id, { title: "H", priority: "high" }));
+        await create(validBody(course._id, { title: "M", priority: "medium" }));
+
+        const res = await request(app).get("/api/assignments?sortBy=priority").set(bearer(token));
+        assert.equal(res.status, 200);
+
+        const rank = { high: 1, medium: 2, low: 3 };
+        const ranks = res.body.map((a) => rank[a.priority] ?? 4);
+        assert.deepEqual(ranks, [...ranks].sort((a, b) => a - b));
+    });
+
     test("rejects a malformed courseId filter", async () => {
         const res = await request(app).get("/api/assignments?courseId=abc").set(bearer(token));
         assert.equal(res.status, 400);

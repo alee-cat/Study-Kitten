@@ -57,14 +57,19 @@ export const AssignmentService = {
     },
 
     listByUser(userId, filters = {}) {
-        const { courseId, completionStatus, priority } = filters;
+        const { courseId, completionStatus, priority, sortBy } = filters;
         if (courseId !== undefined && !ObjectId.isValid(courseId)) {
             const err = new Error("Invalid courseId");
             err.code = "INVALID_COURSE";
             throw err;
         }
+        if (sortBy !== undefined && sortBy !== "priority" && sortBy !== "dueDate") {
+            const err = new Error("Invalid sortBy");
+            err.code = "INVALID_SORT";
+            throw err;
+        }
         
-        return AssignmentRepository.listByUser(userId, { courseId, completionStatus, priority });
+        return AssignmentRepository.listByUser(userId, { courseId, completionStatus, priority, sortBy });
     },
 
     async getById(id, userId) {

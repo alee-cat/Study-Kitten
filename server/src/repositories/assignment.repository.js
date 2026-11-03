@@ -47,13 +47,13 @@ export const AssignmentRepository = {
         return result.deletedCount === 1;
     },
 
-    async listByUser(userId, { courseId, completionStatus, priority } = {}) {
+    async listByUser(userId, { courseId, completionStatus, priority, sortBy } = {}) {
         const match = { userId };
         if (courseId) match.courseId = new ObjectId(courseId);
         if (completionStatus) match.completionStatus = completionStatus;
         if (priority) match.priority = priority;
 
-        return assignments().aggregate([
+        const pipeline = [
             { $match: match },
             { $lookup: {
                     from: "courses",
@@ -63,8 +63,37 @@ export const AssignmentRepository = {
                 } },
             { $unwind: { path: "$course", preserveNullAndEmptyArrays: true } },
             { $project: { "course.userId": 0 } },
-            { $sort: { dueDate: 1 } },
-        ]).toArray();
+        ];
+        
+        if (sortBy === "priority") {
+            pipeline.push(
+                {
+                    $addFields: {
+                        priorityRank: {
+                            $switch: {
+                                branches: [
+                                    {case: {$eq: ["$priority", "high"]}, then: 1},
+                                    {case: {$eq: ["$priority", "medium"]}, then: 2},
+                                    {case: {$eq: ["$priority", "low"]}, then: 3},
+                                ],
+                                default: 4,
+                            },
+                        },
+                    }
+                },
+                { $sort: { priorityRank: 1, dueDate: 1 } },
+                { $project: { priorityRank: 0 } }
+            );
+        }
+        else {
+            pipeline.push(
+                {
+                    $sort: { dueDate: 1 }
+                }
+            )
+        }
+        
+        return assignments().aggregate(pipeline).toArray();
     },
 
     async findOwned(id, userId) {
