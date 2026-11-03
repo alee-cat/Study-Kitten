@@ -16,4 +16,8 @@ function mongoDB() {
     return db;
 }
 
+export async function closeDB() {
+    await client.close();
+}
+
 export { connectDB, mongoDB };

@@ -1,31 +1,63 @@
-//server/src/routes/assignment.routes.js
-
+// server/src/routes/assignment.routes.js
 import { Router } from "express";
 import { AssignmentService } from "../services/assignment.service.js";
+import { requireAuth } from "../middleware/auth.middleware.js";
+import { sendError, notFound } from "../utils/http.js";
 
 const router = Router();
 
-router.post("/assignments", async (req, res) => {
+router.use(requireAuth);
+
+router.get("/assignments", async (req, res) => {
     try {
-        const { userId, title, assignmentType, course, dueDate, priority} = req.body;
-        const assignment = await AssignmentService.create({
-            userId, title, assignmentType, course, dueDate, priority
-        });
-        res.status(201).json(assignment);
+        res.json(await AssignmentService.listByUser(req.user.id, req.query));
     } catch (err) {
-        res.status(400).json({
-            error: { code: err.code || "VALIDATION_ERROR", message: err.message },
-        });
+        sendError(res, err);
     }
 });
 
-router.get("/assignments", async (req, res, next) => {
+router.post("/assignments", async (req, res) => {
     try {
-        const page = Number(req.query.page) || 1;
-        const result = await AssignmentService.listPublished({ page });
-        res.status(200).json(result);
+        const { title, assignmentType, courseId, dueDate, completionStatus, priority } = req.body;
+        const assignment = await AssignmentService.create({
+            userId: req.user.id,
+            title, assignmentType, courseId, dueDate, completionStatus, priority,
+        });
+        res.status(201).json(assignment);
     } catch (err) {
-        next(err);
+        sendError(res, err);
+    }
+});
+
+router.patch("/assignments/:id", async (req, res) => {
+    try {
+        const updated = await AssignmentService.update(req.params.id, req.user.id, req.body);
+        if (!updated) return notFound(res);
+        res.json(updated);
+    } catch (err) {
+        sendError(res, err);
+    }
+});
+
+router.delete("/assignments/:id", async (req, res) => {
+    try {
+        const ok = await AssignmentService.delete(req.params.id, req.user.id);
+        if (!ok) return notFound(res);
+        res.status(204).end();
+    } catch (err) {
+        sendError(res, err);
+    }
+});
+
+router.get("/assignments/:id", requireAuth, async (req, res) => {
+    try {
+        const assignment = await AssignmentService.getById(req.params.id, req.user.id);
+        if (!assignment) {
+            return res.status(404).json({ error: { code: "NOT_FOUND", message: "Not found" } });
+        }
+        res.json(assignment);
+    } catch (err) {
+        sendError(res, err);
     }
 });
 
