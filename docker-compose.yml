@@ -1,0 +1,28 @@
+#docker-compose.yml
+services:
+  db:
+    image: mongo:7
+    ports:
+      - "27018:27017"
+    volumes:
+      - studykitten_db_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand({ ping: 1 })' || exit 1"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+      
+  server:
+    build: ./server
+    environment:
+      MONGODB_URI: mongodb://db:27017/studykitten
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:?set ACCESS_TOKEN_SECRET in .env}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET:?set REFRESH_TOKEN_SECRET in .env}
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+  
+volumes:
+  studykitten_db_data:
