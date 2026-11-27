@@ -7,9 +7,13 @@
   "scripts": {
     "dev": "node --watch --env-file=.env src/index.js",
     "test": "node --test --env-file=.env.test \"__tests__/**/*.test.js\"",
-    "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-exclude=\\\"__tests__/**\\\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --env-file=.env.test \"__tests__/**/*.test.js\""
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-exclude=\\\"__tests__/**\\\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --env-file=.env.test \"__tests__/**/*.test.js\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
-  "engines": { "node":  ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -22,6 +26,9 @@
   },
   "main": "index.js",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.15.0",
+    "globals": "^17.14.0",
     "supertest": "^7.3.1"
   }
 }
