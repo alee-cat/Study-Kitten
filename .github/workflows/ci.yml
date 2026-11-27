@@ -7,29 +7,42 @@ on:
     branches: [main]
   pull_request:
     
+permissions: 
+  contents: read
+    
 jobs:
   dependency-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - run: npm audit --audit-level=high
+      - name: Audit server dependencies
+        run: npm audit --audit-level=high
         working-directory: server
+      - name: Audit client dependencies
+        run: npm audit --audit-level=high
+        working-directory: client
         
-  test:
+  server-tests:
     runs-on: ubuntu-latest
     services:
       mongo:
         image: mongo:7
-        ports:
-          - 27017:27017
+        ports: [ "27017:27017" ]
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: server/package-lock.json
       - run: npm ci
         working-directory: server
       - name: Create test env file
@@ -40,8 +53,45 @@ jobs:
             'ACCESS_TOKEN_SECRET=ci-access-secret' \
             'REFRESH_TOKEN_SECRET=ci-refresh-secret' \
             > .env.test
-      - name: Show env file keys
+      - name: Run tests with coverage
         working-directory: server
-        run: cut -d= -f1 .env.test
-      - run: npm test
-        working-directory: server
+        run: |
+          mkdir -p coverage
+          npm run test:coverage
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: coverage-report
+          path: server/coverage/
+          
+  # client-tests: ...
+          
+  compose-smoke:
+    runs-on: ubuntu-latest
+    needs: [server-tests]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Create root env for Compose
+        run: |
+          printf '%s\n' \
+            'ACCESS_TOKEN_SECRET=ci-access-secret' \
+            'REFRESH_TOKEN_SECRET=ci-refresh-secret' \
+            > .env
+      - run: docker compose up --build -d
+      - name: Wait for the health endpoint
+        run: |
+          for _ in $(seq 1 30); do
+            curl -fs http://localhost:4000/api/health && exit 0
+            sleep 2
+          done
+          docker compose logs server
+          exit 1
+      - name: Register a user (real database operation)
+        run: |
+          curl -fsS -X POST http://localhost:4000/api/auth/register \
+            -H "Content-Type: application/json" \
+            -d '{"email":"ci@example.com","displayName":"Test","password":"Password123"}'
+      - name: Shut down
+        if: always()
+        run: docker compose down -v
