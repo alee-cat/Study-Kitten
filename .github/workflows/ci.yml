@@ -33,12 +33,15 @@ jobs:
       - run: npm ci
         working-directory: server
       - name: Create test env file
-        run: |
-          cat > .env.test <<EOF
-          MONGODB_URL=mongodb://localhost:27017/studykitten_test
-          ACCESS_TOKEN_SECRET=ci-access-secret
-          REFRESH_TOKEN_SECRET=ci-refresh-secret
-          EOF
         working-directory: server
+        run: |
+          printf '%s\n' \
+            'MONGODB_URI=mongodb://localhost:27017/studykitten_test' \
+            'ACCESS_TOKEN_SECRET=ci-access-secret' \
+            'REFRESH_TOKEN_SECRET=ci-refresh-secret' \
+            > .env.test
+      - name: Show env file keys
+        working-directory: server
+        run: cut -d= -f1 .env.test
       - run: npm test
         working-directory: server
