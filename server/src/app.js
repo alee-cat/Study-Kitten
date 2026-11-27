@@ -13,11 +13,11 @@ export const app = express();
 
 
 app.use(express.json());
+app.use("/api", healthRoutes);
 app.use("/api", authRoutes);
 app.use("/api", courseRoutes);
 app.use("/api", assignmentRoutes);
 app.use("/api", taskRoutes);
-app.use("/api", healthRoutes);
 
 
 app.use((err, req, res, next) => {
