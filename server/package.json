@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node --watch --env-file=.env src/index.js",
     "test": "node --test --env-file=.env.test \"__tests__/**/*.test.js\"",
-    "test:coverage": "node --test --experimental-test-coverage --env-file=.env.test \"__tests__/**/*.test.js\""
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-exclude=\\\"__tests__/**\\\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --env-file=.env.test \"__tests__/**/*.test.js\""
   },
   "engines": { "node":  ">=22" },
   "keywords": [],
