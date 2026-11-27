@@ -11,7 +11,10 @@ router.post("/auth/register", async (req, res) => {
         res.status(201).json(result);
     } catch (err) {
         if (err instanceof EmailAlreadyRegisteredError) {
-            return res.status(400).json({ error: { code: "EMAIL_ALREADY_REGISTERED", message: "This email is already registered."} });
+            return res.status(400).json({ error: { code: "EMAIL_ALREADY_REGISTERED", message: "This email is already registered." } });
+        }
+        else if (err instanceof WeakPasswordError) {
+            return res.status(400).json({ error: { code: "WEAK_PASSWORD_ERROR", message: "Password is too weak. Try to add more characters/symbols." } })
         }
         res.status(400).json({ error: { code: err.code || "VALIDATION_ERROR", message: err.message } });
     }
