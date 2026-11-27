@@ -9,6 +9,7 @@
     "test": "node --test --env-file=.env.test \"__tests__/**/*.test.js\"",
     "test:coverage": "node --test --experimental-test-coverage --env-file=.env.test \"__tests__/**/*.test.js\""
   },
+  "engines": { "node":  ">=22" },
   "keywords": [],
   "author": "",
   "license": "ISC",
