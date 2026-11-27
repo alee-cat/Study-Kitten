@@ -30,7 +30,7 @@ export const AuthService = {
         let user;
         try {
             user = await UserRepository.create({ email, displayName, passwordHash});
-        } catch (err) {
+        } catch {
             throw new EmailAlreadyRegisteredError();
         }
         
